@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import lxml
-import matplotlib
+import matplotlib.pyplot as plt
 import time
 import plotly
 import plotly.plotly as py
@@ -33,6 +33,73 @@ class Match:
 
 	def __eq__(self, other):
 		return self.__dict__ == other.__dict__
+
+def num_wins():
+	counter = 0
+	for match in updated_match_list:
+		if(int(match.rounds_for) > int(match.rounds_against)):
+			counter = counter + 1
+	return counter
+
+def num_losses():
+	counter = 0
+	for match in updated_match_list:
+		if(int(match.rounds_for) < int(match.rounds_against)):
+			counter = counter + 1
+	return counter
+
+def num_ties():
+	counter = 0
+	for match in updated_match_list:
+		if(int(match.rounds_for) == int(match.rounds_against)):
+			counter = counter + 1
+	return counter
+
+def plot_map_win_pct():
+	mirage_counter = 0
+	mirage_win_counter = 0
+	inferno_counter = 0
+	inferno_win_counter = 0
+	dust2_counter = 0
+	dust2_win_counter = 0
+	cache_counter = 0
+	cache_win_counter = 0
+	cbble_counter = 0
+	cbble_win_counter = 0
+	overpass_counter = 0
+	overpass_win_counter = 0
+
+	for match in updated_match_list:
+		if(match.map == 'Competitive Mirage'):
+			mirage_counter = mirage_counter + 1
+			if(int(match.rounds_for) > int(match.rounds_against)):
+				mirage_win_counter = mirage_win_counter + 1
+		if(match.map == 'Competitive Inferno'):
+			inferno_counter = inferno_counter + 1
+			if(int(match.rounds_for) > int(match.rounds_against)):
+				inferno_win_counter = inferno_win_counter + 1
+		if(match.map == 'Competitive Dust II'):
+			dust2_counter = dust2_counter + 1
+			if(int(match.rounds_for) > int(match.rounds_against)):
+				dust2_win_counter = dust2_win_counter + 1
+		if(match.map == 'Competitive Cache'):
+			cache_counter = cache_counter + 1
+			if(int(match.rounds_for) > int(match.rounds_against)):
+				cache_win_counter = cache_win_counter + 1
+		if(match.map == 'Competitive Cobblestone'):
+			cbble_counter = cbble_counter + 1
+			if(int(match.rounds_for) > int(match.rounds_against)):
+				cbble_win_counter = cbble_win_counter + 1
+		if(match.map == 'Competitive Overpass'):
+			overpass_counter = overpass_counter + 1
+			if(int(match.rounds_for) > int(match.rounds_against)):
+				overpass_win_counter = overpass_win_counter + 1
+
+	y = [mirage_win_counter/mirage_counter, inferno_win_counter/inferno_counter, dust2_win_counter/dust2_counter, cache_win_counter/cache_counter, cbble_win_counter/cbble_counter, overpass_win_counter/overpass_counter]
+	x = ['Mirage', 'Inferno', 'Dust II', 'Cache', 'Cobblestone', 'Overpass']
+	print(y)
+	plt.bar(x, y)
+	plt.show()
 
 
 start = time.time()
@@ -103,3 +170,17 @@ for match in match_list:
 print(len(match_list))
 print(len(updated_match_list))
 print(len(unfiltered_table_rows))
+
+print(num_wins())
+print(num_losses())
+print(num_ties())
+
+plot_map_win_pct()
+
+
+'''with open('matches.csv', 'w', newline = '') as csv_file:
+	writer = csv.writer(csv_file)
+	for match in updated_match_list:
+		if(match.rounds_for == match.rounds_against):
+			writer.writerow([match.map, match.time, match.wait_time, match.duration, match.viewer_count, match.ping, 
+							match.kills, match.assists, match.deaths, match.hsp, match.score, match.rounds_for, match.rounds_against])'''
