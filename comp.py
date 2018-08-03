@@ -34,6 +34,7 @@ class Match:
 	def __eq__(self, other):
 		return self.__dict__ == other.__dict__
 
+
 def num_wins():
 	counter = 0
 	for match in updated_match_list:
@@ -55,6 +56,10 @@ def num_ties():
 			counter = counter + 1
 	return counter
 
+####################################################################
+#  Plots map win percentages as a bar graph                        #
+#  Missing Train and Nuke right now in the Active Duty Map pool    #
+####################################################################
 def plot_map_win_pct():
 	mirage_counter = 0
 	mirage_win_counter = 0
@@ -95,30 +100,35 @@ def plot_map_win_pct():
 			if(int(match.rounds_for) > int(match.rounds_against)):
 				overpass_win_counter = overpass_win_counter + 1
 
-	y = [mirage_win_counter/mirage_counter, inferno_win_counter/inferno_counter, dust2_win_counter/dust2_counter, cache_win_counter/cache_counter, cbble_win_counter/cbble_counter, overpass_win_counter/overpass_counter]
+	y = [mirage_win_counter/mirage_counter, inferno_win_counter/inferno_counter, dust2_win_counter/dust2_counter, 
+		cache_win_counter/cache_counter, cbble_win_counter/cbble_counter, overpass_win_counter/overpass_counter]
 	x = ['Mirage', 'Inferno', 'Dust II', 'Cache', 'Cobblestone', 'Overpass']
 	print(y)
 	plt.bar(x, y)
 	plt.show()
 
 
-start = time.time()
 with open("ZerO_Comp_Data.html", 'rb') as html:
 	comp_soup = BeautifulSoup(html, "lxml")
-print(time.time() - start)
+
 
 unfiltered_table_rows = comp_soup.find("table", {"class": "generic_kv_table csgo_scoreboard_root"}).find('tbody').find_all('tr', recursive=False)
+
+#First table row in the table is a header row, contains no data
 del unfiltered_table_rows[0]
 
+
 for row in unfiltered_table_rows:
+	#Table with class csgo_scoreboard_iner_left contains the map, match time, wait time, match duration, and viewers
 	match_overview = row.find("table", {"class": ["csgo_scoreboard_inner_left"]}).find('tbody').find_all('tr')
 
+	#If there are only 4 rows in the table, that means there were no viewers, otherwise there will be 5 rows
 	if(len(match_overview) == 4):
 		map_name = match_overview[0].text.strip()
 		time = match_overview[1].text.strip()
 		wait_time = match_overview[2].text.strip()
 		duration = match_overview[3].text.strip()
-		viewer_count = '0'
+		viewer_count = 'Viewers: 0'
 	else:
 		map_name = match_overview[0].text.strip()
 		time = match_overview[1].text.strip()
@@ -126,11 +136,15 @@ for row in unfiltered_table_rows:
 		duration = match_overview[3].text.strip()
 		viewer_count = match_overview[4].text.strip()
 
+	#Table with class csgo_scoreboard_inner_right contains the actual stats of every person
 	scoreboard = row.find("table", {"class": ['csgo_scoreboard_inner_right']}).find('tbody').find_all('tr')
+	#As before, first row is a header and contains no useful data
 	del scoreboard[0]
 
+	#The element at scoreboard index 5 contains the match score
 	round_score_html = scoreboard.pop(5)
 	round_score = round_score_html.find('td').text.split(":")
+
 	count = 0
 	for player in scoreboard:
 		if(player.find("a", {"class": ['linkTitle']}).text != "ZerO_0 hellcase.com"):
@@ -159,6 +173,7 @@ for row in unfiltered_table_rows:
 	match_list.append(test_match)
 	print(map_name, time, wait_time, duration, viewer_count, ping, kills, assists, deaths, mvps, hsp, score, rounds_for, rounds_against)
 
+#Eliminates duplicate maps that occur when the automated javascript scrolling isn't stopped immediately
 for match in match_list:
 	if match.map == '':
 		pass
